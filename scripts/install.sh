@@ -14,7 +14,7 @@ fi
 
 for script in "${SCRIPT_NAMES[@]}"; do
 
-    script_path="$SOURCE_DIR/src/$script.py"
+    script_path="$SOURCE_DIR/src/$script"
 
     if [ ! -f "$script_path" ]; then
         echo "Error: File '$script_path' not found." >&2
