@@ -2,25 +2,156 @@
 
 import os
 import sys
+import math
+from pathlib import Path
 
-def tree(path, prefix=""):
+
+def convert_size(size_bytes: int, decimals: int = 2) -> str:
+    if size_bytes == 0:
+        return "0 bytes"
+    
+    size_names = ["bytes", "KB", "MB", "GB", "TB", "PB"]
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, decimals)
+
+    return f"{s:.{decimals}f} {size_names[i]}"
+
+def get_directory_size(path: Path) -> int:
+    total_size = 0
+
+    try:
+        for entry in path.rglob('*'):
+            if entry.is_file():
+                try:
+                    total_size += entry.stat().st_size
+                except (OSError, PermissionError):
+                    continue
+    except (OSError, PermissionError):
+        pass
+
+    return total_size
+
+def get_file_info(path: str) -> dict:
+    try:
+        item_path = Path(path)
+
+        if not item_path.exists():
+            return {'error': 'File or directory not found', 'path': path, 'type': 'missing'}
+        
+        if item_path.is_file():
+            stat_info = item_path.stat()
+
+            return {
+                'path': str(item_path),
+                'size': stat_info.st_size,
+                'readable_size': convert_size(stat_info.st_size),
+                'type': 'file',
+                'modified': stat_info.st_mtime,
+            }
+        elif item_path.is_dir():
+            total_size = get_directory_size(item_path)
+            return {
+                'path': str(item_path),
+                'size': total_size,
+                'readable_size': convert_size(total_size),
+                'type': 'directory',
+                'item_count': sum(1 for _ in item_path.rglob('*') if _.is_file()),
+            }
+        else:
+            # It's something else (symlink, device, etc.)
+            return {'error': 'Not a regular file or directory', 'path': path, 'type': 'special'}
+
+    except PermissionError:
+        return {'error': 'Permission denied', 'path': path, 'type': 'permission_error'}
+    except OSError as e:
+        return {'error': f'OS error: {e}', 'path': path, 'type': 'os_error'}
+
+
+def tree(path, prefix="", show_size = True):
     if not os.path.isdir(path):
         print(f"ERRO: '{path}' não é um diretório válido")
         return
 
     entries = sorted(os.listdir(path))
     pointers = ['├── '] * (len(entries) - 1) + ['└── ']
+
     for pointer, entry in zip(pointers, entries):
         full_path = os.path.join(path, entry)
-        print(prefix + pointer + entry)
+
+        
+        size_info = ""
+        if show_size:
+            item_info = get_file_info(full_path)
+
+            if 'error' not in item_info:
+                size_info = f"  [{item_info['readable_size']}]"
+
+        print(f"{prefix}{pointer}{entry}{size_info}")
+
+        
         if os.path.isdir(full_path):
             extension = '│   ' if pointer.startswith('├') else '    '
-            tree(full_path, prefix + extension)
+            tree(full_path, prefix + extension, show_size)
+
+
+def print_usage():
+    print(f"Usage: {sys.argv[0]} [options] <path>", file=sys.stderr)
+    print("For directories, shows total recursive size.", file=sys.stderr)
+    print("\nOptions:")
+    print("  -h, --help     Show this help message")
+    print("  -v, --version  Show version information")
+    print("  --no-size      Show tree structure without sizes")
+
 
 def main():
-    dir_path = sys.argv[1] if len(sys.argv) >= 2 else '.'
-    print(dir_path)
-    tree(dir_path)
+
+    show_size = True
+    paths = []
+
+    for arg in sys.argv[1:]:
+        if arg in ['-h', '--help']:
+            print_usage()
+            sys.exit(0)
+        elif arg in ['-v', '--version']:
+            print("0.0.3")
+            sys.exit(0)
+        elif arg == '--no-size':
+            show_size = False
+        elif arg.startswith('-'):
+            print(f"Unknown option: {arg}", file=sys.stderr)
+            print_usage()
+            sys.exit(1)
+        else:
+            paths.append(arg)
+
+    if not paths:
+        paths = ['.']
+
+    exit_code = 0
+
+    for path in paths:
+        if not os.path.exists(path):
+            print(f"Error: Path '{path}' does not exist", file=sys.stderr)
+            exit_code = 1
+            continue
+
+        if os.path.isdir(path):
+            print(f"{path}/")
+            tree(path, show_size=show_size)
+        else:
+            item_info = get_file_info(path)
+            if 'error' in item_info:
+                print(f"Error: {item_info['error']} - '{item_info['path']}'", file=sys.stderr)
+                exit_code = 1
+            else:
+                print(f"{item_info['path']}: {item_info['readable_size']}")
+
+    sys.exit(exit_code)
+
+    # dir_path = sys.argv[1] if len(sys.argv) >= 2 else '.'
+    # print(dir_path, )
+    # tree(dir_path)
 
 if __name__ == "__main__":
     main()
