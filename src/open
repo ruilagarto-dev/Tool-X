@@ -7,7 +7,7 @@ from tkinter import ttk
 from datetime import datetime
 
 def print_help():
-    print("Uso: open [OPÇÕES] <ARQUIVO>")
+    print("Usw: open [OPTIONS] <FILE>")
     print("\Options:")
     print("  -d, --details    Show file details instead of opening")
     print("  -h, --help       Show this help message")
