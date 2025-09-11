@@ -2,99 +2,215 @@
 
 import os
 import sys
+import subprocess
 import tkinter as tk
 from tkinter import ttk
 from datetime import datetime
 
+
+class Multimedia:
+    def __init__(self, filename):
+        self._file = filename
+        self._file_type = self._get_file_type()
+        self._supported_image_formats = ['.jpg', '.jpeg', '.png', '.gif', 
+                                       '.bmp', '.ppm', '.pgm']
+        self._unsupported_formats = ['.svg', '.tiff', '.webp']  # Formatos não suportados pelo tkinter nativo
+        
+    def _get_file_type(self):
+        """Get the file type based on extension"""
+        ext = os.path.splitext(self._file)[1].lower()
+        return ext
+    
+    def is_supported_format(self):
+        """Check if the file format is supported by tkinter"""
+        return self._file_type in self._supported_image_formats
+    
+    def is_known_unsupported(self):
+        """Check if the file format is known to be unsupported"""
+        return self._file_type in self._unsupported_formats
+    
+    def get_file_info(self):
+        """Get detailed file information"""
+        try:
+            stat = os.stat(self._file)
+            
+            result = subprocess.run(
+                ['size', self._file],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            size = result.stdout.strip()
+            
+            return {
+                'name': os.path.basename(self._file),
+                'path': os.path.abspath(self._file),
+                'size': size,
+                'modified': datetime.fromtimestamp(stat.st_mtime),
+                'type': self._file_type.upper(),
+                'supported': self.is_supported_format(),
+                'known_unsupported': self.is_known_unsupported()
+            }
+        except Exception as e:
+            return {'error': str(e)}
+    
+    def displayMedia(self):
+        """Display the media file using tkinter (native support only)"""
+        if not self.is_supported_format():
+            if self.is_known_unsupported():
+                print(f"Format not supported by tkinter: {self._file_type}")
+                print("   Consider converting to a supported format like PNG or JPEG")
+            else:
+                print(f"Unknown or unsupported file format: {self._file_type}")
+            return False
+        
+        try:
+            root = tk.Tk()
+            root.title(f"{os.path.basename(self._file)}")
+            
+            # Use tkinter's native PhotoImage for supported formats
+            try:
+                photo = tk.PhotoImage(file=self._file)
+                
+                label = ttk.Label(root, image=photo)
+                label.pack(padx=20, pady=20)
+                label.image = photo  # Keep a reference
+                
+                # Add some info to the window
+                info = self.get_file_info()
+                if 'error' not in info:
+                    info_text = f"{info['name']} | {info['type']} | {info['size']}"
+                    info_label = ttk.Label(root, text=info_text, font=('Arial', 8))
+                    info_label.pack(pady=5)
+                
+                root.mainloop()
+                return True
+                
+            except Exception as e:
+                root.destroy()
+                print(f"Error loading image: {e}")
+                print("   The file might be corrupted or in an unsupported format")
+                return False
+                
+        except Exception as e:
+            print(f"Error creating viewer: {e}")
+            return False
+    
+    def get_dimensions(self):
+        """Get image dimensions for supported formats"""
+        if not self.is_supported_format():
+            return None
+            
+        try:
+            photo = tk.PhotoImage(file=self._file)
+            return (photo.width(), photo.height())
+        except:
+            return None
+    
+    def show_details(self):
+        """Show detailed information about the file"""
+        info = self.get_file_info()
+        
+        if 'error' in info:
+            print(f"Error: {info['error']}")
+            return False
+        
+        print("File Details:")
+        print(f"   Name: {info['name']}")
+        print(f"   Path: {info['path']}")
+        print(f"   Size: {info['size']}")
+        print(f"   Modified: {info['modified']}")
+        print(f"   Type: {info['type']}")
+        print(f"   Supported by viewer: {'Yes' if info['supported'] else 'No'}")
+        
+        if info['supported']:
+            dimensions = self.get_dimensions()
+            if dimensions:
+                print(f"   Dimensions: {dimensions[0]} x {dimensions[1]} pixels")
+        
+        if info['known_unsupported']:
+            print(f"   Note: {info['type']} format is not supported by the native viewer")
+            
+        return True
+
+
 def print_help():
-    print("Usw: open [OPTIONS] <FILE>")
-    print("\Options:")
+    print("Usage: open [OPTIONS] <FILE>")
+    print("\nOptions:")
     print("  -d, --details    Show file details instead of opening")
     print("  -h, --help       Show this help message")
     print("  -v, --version    Shows the command version")
+    print("\nSupported formats: JPG, JPEG, PNG, GIF, BMP, PPM, PGM")
 
 
 def show_file_details(filename):
-    try:
-        stat = os.stat(filename)
-        size = stat.st_size
-        
-        print("Details:")
-        print(f"   Name: {os.path.basename(filename)}")
-        print(f"   Path: {os.path.abspath(filename)}")
-        print(f"   Size: {size} bytes ({size/1024/1024:.1f} MB)")
-        print(f"   Modified: {datetime.fromtimestamp(stat.st_mtime)}")
-        print(f"   Type: {get_file_type(filename)}")
-        return True
-        
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        return False
-    
-
-def get_file_type(filename):
-    ext = os.path.splitext(filename)[1].lower()
-    types = {
-        '.jpg': 'JPEG', '.jpeg': 'JPEG', '.png': 'PNG', '.gif': 'GIF',
-        '.bmp': 'BMP', '.svg': 'SVG', '.ppm': 'PPM', '.pgm': 'PGM'
-    }
-    return types.get(ext, f'{ext.upper()}')
+    """Show file details using Multimedia class"""
+    media = Multimedia(filename)
+    return media.show_details()
 
 
 def open_with_tkinter(filename):
-    try:
-        root = tk.Tk()
-        root.title(f"{os.path.basename(filename)}")
-    
-        try:
-            photo = tk.PhotoImage(file=filename)
-            
-            label = ttk.Label(root, image=photo)
-            label.pack(padx=20, pady=20)
-            label.image = photo
-            root.mainloop()
-            return True
-            
-        except Exception as e:
-            root.destroy()
-            print(f"Error: {e}")
-            return False
-            
-    except Exception as e:
-        print(f"Error: {e}")
-        return False
+    """Open file using Multimedia class"""
+    media = Multimedia(filename)
+    return media.displayMedia()
+
 
 def open_file(filename, show_details=False):
+    """Open or process file with various options"""
     if not os.path.exists(filename):
-        print(f"❌ Not found: {filename}")
+        print(f"Not found: {filename}")
         return False
     
+    media = Multimedia(filename)
+    
     if show_details:
-        return show_file_details(filename)
+        return media.show_details()
     else:
-        return open_with_tkinter(filename)
+        return media.displayMedia()
+
 
 def main():
     if len(sys.argv) < 2:
         print_help()
         sys.exit(1)
 
-    if sys.argv in ['-h', '--help']:
-        print_help()
-        sys.exit(0)
+    # Parse command line arguments
+    show_details = False
+    
+    i = 1
+    while i < len(sys.argv):
+        arg = sys.argv[i]
+        
+        if arg in ['-h', '--help']:
+            print_help()
+            sys.exit(0)
+            
+        elif arg in ['-v', '--version']:
+            print("v0.0.4")
+            sys.exit(0)
+            
+        elif arg in ['-d', '--details']:
+            show_details = True
+            i += 1
+        else:
+            i += 1
 
-    if sys.argv in ['-v', '--version']:
-        print("v0.0.1")
-        sys.exit(0)
-
-    show_details = '-d' in sys.argv or '--details' in sys.argv
+    # Get file arguments (non-option arguments)
     files = [arg for arg in sys.argv[1:] if not arg.startswith('-')]
     
     if not files:
+        print("No files specified")
         sys.exit(1)
     
+    # Process each file
+    success_count = 0
     for file in files:
-        open_file(file, show_details)
+        if open_file(file, show_details):
+            success_count += 1
+    
+    if success_count == 0:
+        sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
