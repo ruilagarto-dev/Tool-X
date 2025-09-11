@@ -1,0 +1,100 @@
+#!/home/ruimc/Tool-X/venv/bin/python3
+
+import os
+import sys
+import tkinter as tk
+from tkinter import ttk
+from datetime import datetime
+
+def print_help():
+    print("Uso: open [OPÇÕES] <ARQUIVO>")
+    print("\Options:")
+    print("  -d, --details    Show file details instead of opening")
+    print("  -h, --help       Show this help message")
+    print("  -v, --version    Shows the command version")
+
+
+def show_file_details(filename):
+    try:
+        stat = os.stat(filename)
+        size = stat.st_size
+        
+        print("Details:")
+        print(f"   Name: {os.path.basename(filename)}")
+        print(f"   Path: {os.path.abspath(filename)}")
+        print(f"   Size: {size} bytes ({size/1024/1024:.1f} MB)")
+        print(f"   Modified: {datetime.fromtimestamp(stat.st_mtime)}")
+        print(f"   Type: {get_file_type(filename)}")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        return False
+    
+
+def get_file_type(filename):
+    ext = os.path.splitext(filename)[1].lower()
+    types = {
+        '.jpg': 'JPEG', '.jpeg': 'JPEG', '.png': 'PNG', '.gif': 'GIF',
+        '.bmp': 'BMP', '.svg': 'SVG', '.ppm': 'PPM', '.pgm': 'PGM'
+    }
+    return types.get(ext, f'{ext.upper()}')
+
+
+def open_with_tkinter(filename):
+    try:
+        root = tk.Tk()
+        root.title(f"{os.path.basename(filename)}")
+    
+        try:
+            photo = tk.PhotoImage(file=filename)
+            
+            label = ttk.Label(root, image=photo)
+            label.pack(padx=20, pady=20)
+            label.image = photo
+            root.mainloop()
+            return True
+            
+        except Exception as e:
+            root.destroy()
+            print(f"Error: {e}")
+            return False
+            
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+
+def open_file(filename, show_details=False):
+    if not os.path.exists(filename):
+        print(f"❌ Not found: {filename}")
+        return False
+    
+    if show_details:
+        return show_file_details(filename)
+    else:
+        return open_with_tkinter(filename)
+
+def main():
+    if len(sys.argv) < 2:
+        print_help()
+        sys.exit(1)
+
+    if sys.argv in ['-h', '--help']:
+        print_help()
+        sys.exit(0)
+
+    if sys.argv in ['-v', '--version']:
+        print("v0.0.1")
+        sys.exit(0)
+
+    show_details = '-d' in sys.argv or '--details' in sys.argv
+    files = [arg for arg in sys.argv[1:] if not arg.startswith('-')]
+    
+    if not files:
+        sys.exit(1)
+    
+    for file in files:
+        open_file(file, show_details)
+
+if __name__ == "__main__":
+    main()
