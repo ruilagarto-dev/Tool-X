@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 
 import unittest
 import os
@@ -7,7 +7,8 @@ import subprocess
 from io import StringIO
 
 
-class TestTreeScript(unittest.TestCase):
+class TestOpenScript(unittest.TestCase):
+
     def setUp(self):
         pass
 
@@ -15,7 +16,9 @@ class TestTreeScript(unittest.TestCase):
         pass
 
 
-    
+    def run_open_script(self, args):
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+
+import sys
+
+
+def print_usage():
+    print("ok")
+
+def main():
+    for arg in sys.argv[1:]:
+        if arg in ['-h', '--help']:
+            print_usage()
+            sys.exit(0)
+        elif arg in ['-v', '--version']:
+            sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

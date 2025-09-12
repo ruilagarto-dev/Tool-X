@@ -1,6 +1,11 @@
 #!/bin/bash
 
-SCRIPT_NAMES=("del" "size" "tree")
+SCRIPT_NAMES=(
+    "tool-x" "del" 
+    "size" "tree" 
+    "open"
+)
+
 TARGET_DIR="/usr/local/bin"
 
 echo "Uninstalling Tool-X utilities..."
