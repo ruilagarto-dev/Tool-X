@@ -1,31 +1,98 @@
-#!/home/ruimc/Tool-X/venv/bin/python3
+#!/usr/bin/env python3
 
 import os
 import sys
 import shutil
 
+
+def print_help():
+    print("Usage: del [OPTIONS] <FILE/DIRECTORY...>")
+    print("Remove files or directories permanently.")
+    print("\nOptions:")
+    print("  -h, --help       Show this help message and exit")
+    print("  -v, --version    Show version information and exit")
+    print("\nArguments:")
+    print("  FILE/DIRECTORY   One or more files or directories to delete")
+    print("\nDescription:")
+    print("  The del command permanently removes files and directories.")
+    print("  Use with caution as deleted items cannot be recovered.")
+    print("  For directories, the deletion is recursive (includes all contents).")
+    print("\nExamples:")
+    print("  del file.txt                  # Delete a single file")
+    print("  del file1.txt file2.txt       # Delete multiple files")
+    print("  del old_directory/            # Delete a directory and its contents")
+    print("  del *.tmp                     # Delete all .tmp files in current directory")
+    print("\nExit Status:")
+    print("  0  Success")
+    print("  1  Error occurred during deletion")
+    print("  2  Invalid arguments or missing parameters")
+
+
 def main():
     if len(sys.argv) < 2:
         print("[ERROR] -> Missing file argument", file=sys.stderr)
         print(f"Usage: {sys.argv[0]} <file1> <file2> ...", file=sys.stderr)
-        sys.exit(1)
+        print("Try 'del --help' for more information.", file=sys.stderr)
+        sys.exit(2)
 
+    # Check for help or version flags
+    if sys.argv[1] in ['-h', '--help']:
+        print_help()
+        sys.exit(0)
+
+    if sys.argv[1] in ['-v', '--version']:
+        print('del version 0.0.1')
+        sys.exit(0)
+
+    # Process files/directories
+    success_count = 0
+    error_count = 0
+    
     for path in sys.argv[1:]:
+        # Skip flags that might be mixed with files
+        if path.startswith('-'):
+            print(f"Warning: Skipping unknown option '{path}'", file=sys.stderr)
+            continue
+            
         try:
             if os.path.isfile(path):
                 os.remove(path)
+                print(f"Deleted file: {path}")
+                success_count += 1
 
             elif os.path.isdir(path):
                 shutil.rmtree(path)
+                print(f"Deleted directory: {path}")
+                success_count += 1
+            else:
+                print(f"Error: Path '{path}' does not exist", file=sys.stderr)
+                error_count += 1
                 
         except FileNotFoundError:
-            print(f"Error: file '{path}' not found.", file=sys.stderr)
+            print(f"Error: '{path}' not found.", file=sys.stderr)
+            error_count += 1
         except PermissionError:
-            print(f"Error: permission denied to access '{path}'.", file=sys.stderr)
+            print(f"Error: Permission denied to delete '{path}'.", file=sys.stderr)
+            error_count += 1
         except IsADirectoryError:
-            print(f"Error: '{path}' is a directory, not a file.", file=sys.stderr)
+            print(f"Error: '{path}' is a directory. Use directory deletion syntax.", file=sys.stderr)
+            error_count += 1
         except Exception as e:
-            print(f"Error: could not delete '{path}': {e}", file=sys.stderr)
+            print(f"Error: Could not delete '{path}': {e}", file=sys.stderr)
+            error_count += 1
+
+    # Summary
+    if success_count > 0:
+        print(f"\nSuccessfully deleted {success_count} item(s)")
+    
+    if error_count > 0:
+        print(f"Failed to delete {error_count} item(s)", file=sys.stderr)
+        sys.exit(1)
+    
+    if success_count == 0 and error_count == 0:
+        print("No items specified for deletion")
+        sys.exit(2)
+
 
 if __name__ == "__main__":
     main()
