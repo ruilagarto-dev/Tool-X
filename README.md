@@ -1,57 +1,71 @@
 # Tool-X
 
-Tool-X simplifica o uso do Raspberry Pi com comandos simples para arquivos e pastas, tornando as tarefas mais simples e rápidas mesmo para iniciantes.
+Tool-X simplifies using Raspberry Pi with simple commands for files and folders, making tasks easier and faster even for beginners.
 
-## Comandos Disponíveis
 
-### ``del`` - Apaga arquivos ou diretórios
-Remove permanentemente arquivos ou diretorios do sistema.
+## Available Commands
 
-Exemplos:
-```bash
-del arquivo.txt
-del pasta_arquivo/
-del *.temp
-del arquivo1.txt arquivo2.txt
-```
-Opções:
-- `-h, --help` - Mostra mensagem de ajuda.
-- `-v, --version` -Mostra informação de versão
-
-<br>
-
-### ``open`` - Abre arquivos de imagem
-Visualiza imagens diretamente no terminal (formatos suportados: JPG, JPEG, PNG, GIF, BMP, PPM, PGM)
+### ``del`` - Delete files or directories
+Permanently removes files or directories from the system.
 
 #### Exemplos:
 ```bash
-open imagem.jpg
-open -d foto.png
+del file.txt
+del old_folder/
+del *.tmp
+del file1.txt file2.txt
 ```
-#### Opçóes:
-- `-d, --details` - Mostra detalhes do arquivo sem abrir
-- `-h, --help`- Mostra mensagem de ajuda.
-- `-v, --version` - Mostra informação de versão.
+#### Options:
+- `-h, --help` - Show help message
+- `-v, --version` - Show version information.
 
 <br>
 
-### `size` - Mostra o tamanho de arquivos ou pastas
-Exibe o tamanho de arquivos ou diretorios em formato legível (recursivo para pastas).
+### ``open`` - Open image files
+View images directly in the terminal (supported formats: JPG, JPEG, PNG, GIF, BMP, PPM, PGM)
 
-#### Exemplos
+#### Examples:
 ```bash
-size arquivo.txt
-size pasta/
-size arquivo1.txt arquivo2.txt
+open image.jpg
+open -d photo.png  # Show details without opening
+open image1.png image2.jpg
+```
+#### Options:
+- `-d, --details` - Show file details without opening.
+- `-h, --help`- Show help message.
+- `-v, --version` - Show version information.
+
+<br>
+
+### `size` - Show size of files or folders
+Displays the size of files or directories in human-readable format (recursive for folders).
+
+#### Examples:
+```bash
+size file.txt
+size folder/
+size file1.txt file2.txt folder/
 ```
 
-#### Opções:
-- `-h, --help` - Mostra mensagem de ajuda.
+#### Options:
+- `-h, --help` - Show help message.
+- `-v, --version` - Show verison information.
 
 
----
+### `tree` - Display directory structure in tree format
+Shows directory hierarchy with option to include file sizes.
 
-## Instalação
+#### Examples:
+```bash
+tree /path/to/directory
+tree --no-size 
+```
+#### Options:
+- `--no-size` - Show tree without size information.
+- `-h, --help` - Show help message.
+- `-v, --version` - Show verison information.
+
+## Installation
 
 ```bash
 cd Tool-X/scripts/
@@ -62,4 +76,28 @@ bash install.sh
 ```bash
 cd Tool-X/scripts/
 bash uninstall.sh
+```
+
+
+## Project Structure
+
+```
+Tool-X/
+├── README.md
+├── scripts/
+│   ├── install.sh
+|   └── uninstall.sh
+├── tests/
+│   ├── run_tests.sh
+|   ├── test_del.py
+|   ├── test_open.py
+|   ├── test_size.py
+|   └── test_tree.py
+└── src/
+    ├── tool-x
+    ├── del
+    ├── open
+    ├── size
+    └── tree
+
 ```
