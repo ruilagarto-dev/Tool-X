@@ -1,7 +1,5 @@
 # Tool-X
 
---
-
 Tool-X simplifica o uso do Raspberry Pi com comandos simples para arquivos e pastas, tornando as tarefas mais simples e rápidas mesmo para iniciantes.
 
 ## Comandos Disponíveis
