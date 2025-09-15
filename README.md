@@ -1,40 +1,51 @@
 # Tool-X
 
 --
-Tool - x simplifica o uso do raspberry pi com comandos simples para arwuivos e pastas, alem disso torna as tarefas mais simples e rapidas mesmo para iniciantes.
 
-''del'' - apaga arquivo do sistema
-''open'' - abre arquivos de imagem dire
+Tool-X simplifica o uso do Raspberry Pi com comandos simples para arquivos e pastas, tornando as tarefas mais simples e rápidas mesmo para iniciantes.
 
-''size'' - mostra o tamnho de arquivos ou pastas
+## Comandos Disponíveis
 
-''tree'' - exibe a estrutura de diretorios em formato de arvore
+### ``del`` - Apaga arquivos ou diretórios
+Remove permanentemente arquivos ou diretorios do sistema.
 
-## Exemplos
-''del '' 
+Exemplos:
+```bash
+del arquivo.txt
+del pasta_arquivo/
+del *.temp
+del arquivo1.txt arquivo2.txt
+```
+Opções:
+- `-h, --help` - Mostra mensagem de ajuda.
+- `-v, --version` -Mostra informação de versão
 
+<br>
 
-'' size ''
+### ``open`` - Abre arquivos de imagem
+Visualiza imagens diretamente no terminal (formatos suportados: JPG, JPEG, PNG, GIF, BMP, PPM, PGM)
 
+#### Exemplos:
+```bash
+open imagem.jpg
+open -d foto.png
+```
+#### Opçóes:
+- `-d, --details` - Mostra detalhes do arquivo sem abrir
+- `-h, --help`- Mostra mensagem de ajuda.
+- `-v, --version` - Mostra informação de versão.
 
-'' tree ''
+<br>
 
+### `size` - Mostra o tamanho de arquivos ou pastas
+Exibe o tamanho de arquivos ou diretorios em formato legível (recursivo para pastas).
 
-'' size ''
+#### Exemplos
+```bash
+size arquivo.txt
+size pasta/
+size arquivo1.txt arquivo2.txt
+```
 
-
-''tree''
-
-
-## Instalação
-
-1 - Clone o repositorio
-2 - 
-
-
-
-
-
-
-
-
+#### Opções:
+- `-h, --help` - Mostra mensagem de ajuda.
