@@ -47,3 +47,19 @@ size arquivo1.txt arquivo2.txt
 
 #### Opções:
 - `-h, --help` - Mostra mensagem de ajuda.
+
+
+---
+
+## Instalação
+
+```bash
+cd Tool-X/scripts/
+bash install.sh
+```
+
+## Desinstalar
+```bash
+cd Tool-X/scripts/
+bash uninstall.sh
+```
